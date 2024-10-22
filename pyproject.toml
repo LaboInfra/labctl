@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "labctl"
+version = "0.0.0"
+description = "A simple cli tool to manage your access to LaboInfra ESGI Cloud"
+authors = ["msterhuj <gabin.lanore@gmail.com>"]
+readme = "README.md"
+#homepage = ""
+#documentation = ""
+repository = "https://github.com/laboinfra/labctl"
+keywords = ["labctl", "laboinfra", "ESGI", "cloud", "openstack", "vpn"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+    "Topic :: Utilities",
+] # https://pypi.org/classifiers/
+
+[tool.poetry.scripts]
+tdmctl = "labctl.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+pyyaml = "^6.0.2"
+typer = {extras = ["all"], version = "^0.12.5"}
+colorama = "^0.4.6"
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
