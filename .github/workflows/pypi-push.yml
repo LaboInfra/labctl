@@ -1,0 +1,26 @@
+name: Push cli to PyPI
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: "Build pip package"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout Action"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: "Set version to pyproject.toml and __init__.py"
+        run: |
+          python scripts/set_version.py ${{ github.event.release.tag_name }}
+
+      - name: "Build and publish to pypi"
+        uses: JRubics/poetry-publish@v2.0
+        with:
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
+          python_version: "3.12"
