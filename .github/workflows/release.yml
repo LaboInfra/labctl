@@ -25,9 +25,9 @@ jobs:
         uses: codacy/git-version@2.5.4
         with:
           release-branch: 'main'
-          major-identifier: 'breaking'
-          minor-identifier: 'feat'
-          dev-branch: 'develop'
+          major-identifier: 'breaking:'
+          minor-identifier: 'feat:'
+          dev-branch: 'develop:'
 
       - id: tag
         run: echo "::set-output name=tag::${{ steps.version.outputs.version }}"

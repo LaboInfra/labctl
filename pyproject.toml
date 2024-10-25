@@ -17,7 +17,7 @@ classifiers = [
 ] # https://pypi.org/classifiers/
 
 [tool.poetry.scripts]
-tdmctl = "labctl.main:app"
+labctl = "labctl.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.12"
