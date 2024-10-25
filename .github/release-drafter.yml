@@ -31,9 +31,13 @@ autolabeler:
   - label: 'feature'
     title:
       - '/feature/i'
+      - '/feat/i'
+      - '/enhancement/i'
   - label: 'fix'
     title:
       - '/fix/i'
+      - '/bugfix/i'
+      - '/bug/i'
 template: |
   ## Changes
 
