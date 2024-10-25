@@ -13,43 +13,53 @@ jobs:
     name: "Generate version"
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.tag.outputs.tag }}
+      next: ${{ steps.semver.outputs.next }}
     steps:
       - name: "Checkout Action"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Git Version
-        id: version
-        uses: codacy/git-version@2.5.4
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
         with:
-          release-branch: 'main'
-          major-identifier: 'breaking:'
-          minor-identifier: 'feat:'
-          dev-branch: 'develop:'
+          token: ${{ github.token }}
+          branch: main
+          minorList: "feat, feature"
+          patchList: "fix, bugfix, perf, refactor, test, tests"
+          patchAll: false
+          skipInvalidTags: false
+          noVersionBumpBehavior: "error"
+          noNewCommitBehavior: "error"
+          maxTagsToFetch: 10
 
-      - id: tag
-        run: echo "::set-output name=tag::${{ steps.version.outputs.version }}"
-
-  build:
-    name: "Build pip package"
-    runs-on: ubuntu-latest
-    needs:
-      - generate-version
-
-    steps:
-      - name: "Checkout Action"
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: "Set version to pyproject.toml and __init__.py"
+      - name: Show current, next, nextStrict, nextMajor, nextMajorStrict, bump
         run: |
-          python scripts/set_version.py ${{ needs.generate-version.outputs.tag }}
-
-      - name: Build and publish to pypi
-        uses: JRubics/poetry-publish@v2.0
-        with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
-          python_version: "3.12"
+          echo "Current: ${{ steps.semver.outputs.current }}"
+          echo "Next: ${{ steps.semver.outputs.next }}"
+          echo "Next Strict: ${{ steps.semver.outputs.nextStrict }}"
+          echo "Next Major: ${{ steps.semver.outputs.nextMajor }}"
+          echo "Next Major Strict: ${{ steps.semver.outputs.nextMajorStrict }}"
+          echo "Bump: ${{ steps.semver.outputs.bump }}"
+#  build:
+#    name: "Build pip package"
+#    runs-on: ubuntu-latest
+#    needs:
+#      - generate-version
+#
+#    steps:
+#      - name: "Checkout Action"
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#
+#      - name: "Set version to pyproject.toml and __init__.py"
+#        run: |
+#          python scripts/set_version.py ${{ needs.generate-version.outputs.next }}
+#
+#      - name: Build and publish to pypi
+#        uses: JRubics/poetry-publish@v2.0
+#        with:
+#          pypi_token: ${{ secrets.PYPI_TOKEN }}
+#          python_version: "3.12"
