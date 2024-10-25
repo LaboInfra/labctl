@@ -16,6 +16,7 @@ def replace(file, pattern, replace):
 version = "0.0.0"
 if len(argv) > 1:
     version = argv[1]
+    version = version.replace("v", "")
 
 if not re.match(r"^\d+\.\d+\.\d+$", version):
     print("Invalid version format. Please use MAJOR.MINOR.PATCH format")
