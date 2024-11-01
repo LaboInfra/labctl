@@ -18,3 +18,6 @@ class APIDriver:
 
     def get(self, path: str):
         return requests.get(self.api_url + path, headers=self.headers).json()
+
+    def me(self):
+        return self.get("/status")
