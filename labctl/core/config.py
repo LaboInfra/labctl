@@ -8,6 +8,7 @@ CONIIG_FILE = ".labctl_config.yaml"
 class Config:
 
     api_endpoint: str
+    username: str
     api_token: str
     token_type: str
 
@@ -53,4 +54,4 @@ class Config:
         """
         Check if the configuration is ready to be used
         """
-        return all([self.api_endpoint, self.api_token, self.token_type])
+        return all([self.api_endpoint, self.api_token, self.token_type, self.username])

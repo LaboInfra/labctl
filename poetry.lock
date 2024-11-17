@@ -427,7 +427,18 @@ h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
+[[package]]
+name = "wgconfig"
+version = "1.0.4"
+description = "parsing and writing WireGuard configuration files"
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "wgconfig-1.0.4-py3-none-any.whl", hash = "sha256:989b48376d6532d214c67e006d66d17813236c31447607cf4f4ada078e85a075"},
+    {file = "wgconfig-1.0.4.tar.gz", hash = "sha256:b87a539b0d28941381666ed4cef67840f4c38a2523459cc56153a14610d4f961"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c42a1091a450987a326e13edbe036c017770caa005ece6ecbd136e1ecbf068ca"
+content-hash = "49dcee5b6310dc2f7ac20939995c837e1318fba717dc6a8fed659237c993448b"

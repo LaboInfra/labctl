@@ -15,7 +15,7 @@ def show():
     config = Config()
     api_token = config.api_token
     if api_token:
-        me = APIDriver().get("/me")
+        me = APIDriver().get("/me").json()
         # todo handle old token and valid token
         if me.get("email"):
             api_token = "Logged in as " + me["email"]
@@ -27,6 +27,7 @@ def show():
     table.add_column("Key", style="cyan")
     table.add_column("Value", style="magenta")
     table.add_row("API URL", config.api_endpoint)
+    table.add_row("API User", config.username)
     table.add_row("API Token", api_token)
     console.print(table)
 

@@ -22,12 +22,19 @@ class APIDriver:
         }
 
     def validate_token(self):
-        return self.get("/token/verify").get("valid", False)
+        return self.get("/token/verify").json().get("valid", False)
 
-    def get(self, path: str):
-        return requests.get(self.api_url + path, headers=self.headers).json()
+    def get(self, path: str) -> requests.Response:
+        return requests.get(self.api_url + path, headers=self.headers)
 
-    def post(self, path: str, data: dict = {}, additional_headers: dict = {}):
+    def post(self, path: str, data: dict = {}, json: dict = {}, additional_headers: dict = {}) -> requests.Response:
         headers = self.headers
         headers.update(additional_headers)
-        return requests.post(self.api_url + path, headers=headers, data=data).json()
+        if data:
+            return requests.post(self.api_url + path, headers=headers, data=data)
+        if json:
+            return requests.post(self.api_url + path, headers=headers, json=json)
+        return requests.post(self.api_url + path, headers=headers)
+
+    def delete(self, path: str) -> requests.Response:
+        return requests.delete(self.api_url + path, headers=self.headers)

@@ -13,6 +13,7 @@ from labctl.core import APIDriver, Config, console, cli_ready
 app = typer.Typer()
 
 app.add_typer(commands.config_app, name="config", help="Manage the configuration")
+app.add_typer(commands.devices_app, name="devices", help="Manage vpn devices")
 
 @app.callback()
 def callback():
@@ -39,7 +40,7 @@ def me(
     Print the current status of the fastonboard-api account
     """
     api_driver = APIDriver()
-    data = api_driver.get("/me")
+    data = api_driver.get("/me").json()
     if json:
         print(dumps(data))
         return
@@ -66,12 +67,12 @@ def sync():
     Ask FastOnBoard-API to sync your account onto the vpn and openstack services
     """
     api = APIDriver()
-    me = api.get("/me")
-    task_id = api.get("/users/" + me['username'] + "/sync")
+    me = api.get("/me").json()
+    task_id = api.get("/users/" + me['username'] + "/sync").json()
     typer.echo(f"Syncing account for user {me['username']} this may take a while...")
     typer.echo("Task ID: " + task_id.get("id"))
     while True:
-        task = api.get("/users/" + me['username'] + "/sync/" + task_id.get("id"))
+        task = api.get("/users/" + me['username'] + "/sync/" + task_id.get("id")).json()
         if task.get("status") == "SUCCESS":
             typer.echo("Sync successful")
             break
@@ -81,11 +82,16 @@ def sync():
         sleep(1)
 
 @app.command()
-def login(username: Annotated[str, typer.Argument(help="The username to authenticate with")]):
+def login(username: str = typer.Option(None, help="The username to login with")):
     """
     Login to the FastOnBoard-API server
     Enter your password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
     """
+    env_user = environ.get("LABCTL_API_ENDPOINT_USERNAME")
+    username = Config().username or username or env_user
+    if not username:
+        username = typer.prompt("Enter your username")
+
     env_pass = environ.get("LABCTL_API_ENDPOINT_PASSWORD")
     if env_pass:
         password = env_pass
@@ -103,7 +109,7 @@ def login(username: Annotated[str, typer.Argument(help="The username to authenti
         'password': password,
     }, additional_headers={
         'Content-Type': 'application/x-www-form-urlencoded',
-    })
+    }).json()
     if 'detail' in data:
         if "Method Not Allowed" in data['detail']:
             console.print("[red]Error: Invalid endpoint or path to api[/red]")
@@ -112,6 +118,7 @@ def login(username: Annotated[str, typer.Argument(help="The username to authenti
         return
     if 'access_token' in data:
         config = Config()
+        config.username=username
         config.api_token=data['access_token']
         config.token_type=data["token_type"]
         config.save()

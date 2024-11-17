@@ -25,6 +25,7 @@ requests = "^2.32.3"
 pyyaml = "^6.0.2"
 typer = {extras = ["all"], version = "^0.12.5"}
 colorama = "^0.4.6"
+wgconfig = "^1.0.4"
 
 
 [tool.poetry.dev-dependencies]
