@@ -59,36 +59,41 @@ def sync():
         sleep(1)
 
 @app.command()
-def init(
-    endpoint: Annotated[str, typer.Argument(help="The endpoint of the FastOnBoard-API server")],
-    username: Annotated[str, typer.Argument(help="The username to authenticate with")],
-    ):
-    password = typer.prompt("Enter your password", hide_input=True)
+def login(username: Annotated[str, typer.Argument(help="The username to authenticate with")]):
+    """
+    Login to the FastOnBoard-API server
+    Enter your password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
+    """
+    env_pass = environ.get("LABCTL_API_ENDPOINT_PASSWORD")
+    if env_pass:
+        password = env_pass
+    else:
+        password = typer.prompt("Enter your password", hide_input=True)
 
-    headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
-    data = {
+    api_driver = APIDriver()
+
+    if not api_driver.api_url:
+        console.print("[red]Error: API endpoint not set use `labctl config set --api-endpoint=<server>`[/red]")
+        return
+
+    data = api_driver.post("/token", data={
         'username': username,
         'password': password,
-    }
-    data = requests.post(endpoint + "/token", headers=headers, data=data).json()
+    }, additional_headers={
+        'Content-Type': 'application/x-www-form-urlencoded',
+    })
     if 'detail' in data:
         if "Method Not Allowed" in data['detail']:
-            typer.echo("Invalid endpoint or path to api")
+            console.print("[red]Error: Invalid endpoint or path to api[/red]")
             return
-        typer.echo(data['detail'])
+        console.print(f"[red]Authentication failed : {data['detail']}[/red]")
         return
     if 'access_token' in data:
-        typer.echo("Successfully authenticated")
-        ConfigManager(
-            Config(
-                api_endpoint=endpoint,
-                api_token=data['access_token'],
-                token_type=data["token_type"]
-            )
-        )
-        print("Config file initialized and authentication successful")
+        config = Config()
+        config.api_token=data['access_token']
+        config.token_type=data["token_type"]
+        config.save()
+        console.print("[green]Authentication successful[/green]")
         return
-    typer.echo("Authentication failed with unknown error")
+    console.print("[red]Authentication failed with unknown error[/red]")
+    console.print_json(data)
