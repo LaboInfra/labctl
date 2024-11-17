@@ -81,11 +81,16 @@ def sync():
         sleep(1)
 
 @app.command()
-def login(username: Annotated[str, typer.Argument(help="The username to authenticate with")]):
+def login(username: str = typer.Option(None, help="The username to login with")):
     """
     Login to the FastOnBoard-API server
     Enter your password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
     """
+    env_user = environ.get("LABCTL_API_ENDPOINT_USERNAME")
+    username = Config().username or username or env_user
+    if not username:
+        username = typer.prompt("Enter your username")
+
     env_pass = environ.get("LABCTL_API_ENDPOINT_PASSWORD")
     if env_pass:
         password = env_pass
@@ -112,6 +117,7 @@ def login(username: Annotated[str, typer.Argument(help="The username to authenti
         return
     if 'access_token' in data:
         config = Config()
+        config.username=username
         config.api_token=data['access_token']
         config.token_type=data["token_type"]
         config.save()

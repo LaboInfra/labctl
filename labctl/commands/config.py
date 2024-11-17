@@ -27,6 +27,7 @@ def show():
     table.add_column("Key", style="cyan")
     table.add_column("Value", style="magenta")
     table.add_row("API URL", config.api_endpoint)
+    table.add_row("API User", config.username)
     table.add_row("API Token", api_token)
     console.print(table)
 
