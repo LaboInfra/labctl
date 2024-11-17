@@ -1,14 +1,17 @@
 from typing import Annotated
 from time import sleep
+from os import environ
+from json import dumps
 
 import requests
 import typer
+from rich.tree import Tree
 
 from labctl import __version__, commands
 from labctl.core import APIDriver, Config, console, cli_ready
-from labctl.config import Config, ConfigManager
 
 app = typer.Typer()
+
 app.add_typer(commands.config_app, name="config", help="Manage the configuration")
 
 @app.callback()
@@ -24,21 +27,40 @@ def version():
     """
     version = __version__
     if version == "0.0.0":
-        version = "dev"
-    typer.echo("labctl version {}".format(version))
+        version = "dev or installed from source"
+    console.print(f"labctl version: {version} :rocket:")
 
 @app.command()
-def status():
+@cli_ready
+def me(
+    json: bool = typer.Option(False, help="Output the data as json")
+):
     """
     Print the current status of the fastonboard-api account
     """
-    api = APIDriver()
-    status: dict = api.me()
-    typer.echo("Status:")
-    typer.echo(f"  - User: {status['username']}")
-    typer.echo(f"  - Email: {status['email']}")
+    api_driver = APIDriver()
+    data = api_driver.get("/me")
+    if json:
+        print(dumps(data))
+        return
+    tree = Tree("[bold blue]:open_file_folder: FastOnBoard Account[/bold blue]")
+    tree.add("[bold]Username:[/bold] " + data.get("username"))
+    tree.add("[bold]Email:[/bold] " + data.get("email"))
+
+    devices_tree = tree.add(":open_file_folder: Devices")
+    for device in data.get('devices_access', []):
+        device_tree = devices_tree.add(":computer: " + device.get('name', ':question: Unnamed Device'))
+        device_tree.add("[bold]ID:[/bold] " + device.get('id', ''))
+        device_tree.add("[bold]IPv4:[/bold] " + device.get('ipv4', ''))
+        device_tree.add("[bold]Latest Handshake:[/bold] " + str(device.get('latest_handshake', '')))
+        device_tree.add("[bold]RX Bytes:[/bold] " + str(device.get('rx_bytes', 0)))
+        device_tree.add("[bold]TX Bytes:[/bold] " + str(device.get('tx_bytes', 0)))
+        device_tree.add("[bold]Remote IP:[/bold] " + str(device.get('remote_ip', '')))
+    console.print(tree)
+
 
 @app.command()
+@cli_ready
 def sync():
     """
     Ask FastOnBoard-API to sync your account onto the vpn and openstack services
