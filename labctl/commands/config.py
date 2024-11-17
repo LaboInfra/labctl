@@ -15,7 +15,7 @@ def show():
     config = Config()
     api_token = config.api_token
     if api_token:
-        me = APIDriver().get("/me")
+        me = APIDriver().get("/me").json()
         # todo handle old token and valid token
         if me.get("email"):
             api_token = "Logged in as " + me["email"]
