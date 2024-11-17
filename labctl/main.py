@@ -87,6 +87,10 @@ def login(username: str = typer.Option(None, help="The username to login with"))
     Login to the FastOnBoard-API server
     Enter your password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
     """
+    config = Config()
+    if not config.api_endpoint:
+        console.print("[red]Error: Config not ready use `labctl config set --api-endpoint=<server>`[/red]")
+        return
     env_user = environ.get("LABCTL_API_ENDPOINT_USERNAME")
     username = Config().username or username or env_user
     if not username:
