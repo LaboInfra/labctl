@@ -4,11 +4,12 @@ from time import sleep
 import requests
 import typer
 
-from labctl import __version__
-from labctl.api_driver import APIDriver
+from labctl import __version__, commands
+from labctl.core import APIDriver, Config, console, cli_ready
 from labctl.config import Config, ConfigManager
 
 app = typer.Typer()
+app.add_typer(commands.config_app, name="config", help="Manage the configuration")
 
 @app.callback()
 def callback():
