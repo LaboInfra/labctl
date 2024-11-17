@@ -66,7 +66,7 @@ def sync():
     Ask FastOnBoard-API to sync your account onto the vpn and openstack services
     """
     api = APIDriver()
-    me = api.me()
+    me = api.get("/me")
     task_id = api.get("/users/" + me['username'] + "/sync")
     typer.echo(f"Syncing account for user {me['username']} this may take a while...")
     typer.echo("Task ID: " + task_id.get("id"))
