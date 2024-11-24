@@ -59,7 +59,6 @@ def me(
         device_tree.add("[bold]Remote IP:[/bold] " + str(device.get('remote_ip', '')))
     console.print(tree)
 
-
 @app.command()
 @cli_ready
 def sync():
@@ -130,3 +129,67 @@ def login(username: str = typer.Option(None, help="The username to login with"))
         return
     console.print("[red]Authentication failed with unknown error[/red]")
     console.print_json(data)
+
+@app.command()
+def reset_password(
+    username: str = typer.Option(None, help="The username to reset the password for"),
+    token: str = typer.Option(None, help="The token to reset the password with")
+):
+    """
+    Reset the password for the FastOnBoard-API server
+    Enter your new password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
+    """
+    config = Config()
+    if not config.api_endpoint:
+        console.print("[red]Error: Config not ready use `labctl config set --api-endpoint=<server>`[/red]")
+        return
+    username = Config().username or username or environ.get("LABCTL_API_ENDPOINT_USERNAME")
+    if not username:
+        username = typer.prompt("Enter your username")
+
+    password = environ.get("LABCTL_API_ENDPOINT_PASSWORD")
+    if not password:
+        password = typer.prompt("Enter your new password", hide_input=True)
+        password2 = typer.prompt("Enter your new password again", hide_input=True)
+        if password != password2:
+            console.print("[red]Error: Passwords do not match[/red]")
+            return
+
+    api_driver = APIDriver()
+    data = api_driver.post(f"/users/{username}/reset-password", json={
+        'token': token,
+        'password': password,
+    }).json()
+    if 'detail' in data:
+        console.print(f"[red]Error: {data['detail']}[/red]")
+        return
+    console.print(f"[green]{data.get("message")} for {username}[/green]")
+    console.print(f"[green]You can now login with your new password[/green]")
+    console.print(f"[green]Use `labctl login` to login[/green]")
+    config.username=username
+    config.save()
+
+@app.command()
+@cli_ready
+def change_password():
+    """
+    Change the password for the FastOnBoard-API server
+    Enter your new password when prompted or set LABCTL_API_ENDPOINT_PASSWORD
+    """
+    config = Config()
+
+    password = environ.get("LABCTL_API_ENDPOINT_PASSWORD")
+    if not password:
+        password = typer.prompt("Enter your new password", hide_input=True)
+        password2 = typer.prompt("Enter your new password again", hide_input=True)
+        if password != password2:
+            console.print("[red]Error: Passwords do not match[/red]")
+            return
+    api_driver = APIDriver()
+    data = api_driver.post(f"/users/{config.username}/change-password", json={
+        'password': password,
+    }).json()
+    if 'detail' in data:
+        console.print(f"[red]Error: {data['detail']}[/red]")
+        return
+    console.print(f"[green]{data.get("message")} for {config.username}[/green]")
