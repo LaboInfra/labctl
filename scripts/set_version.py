@@ -24,4 +24,4 @@ if not re.match(r"^\d+\.\d+\.\d+$", version):
 
 print(f"Setting version to {version}")
 replace("pyproject.toml", "version = \"[0-9.]+\"", f"version = \"{version}\"")
-replace("labctl/__init__.py", "__version__ = \"[0-9.]+\"", f"__version__ = \"{version}\"")
+replace("labctl/__init__.py", "__version__ = '[0-9.]+'", f"__version__ = '{version}'")
