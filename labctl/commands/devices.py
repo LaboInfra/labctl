@@ -18,54 +18,42 @@ def list_devices():
     config = Config()
     devices = APIDriver().get("/devices/" + config.username).json()
     table = Table(title=":computer: Devices")
-    table.add_column("ID", style="cyan")
-    table.add_column("Name", style="magenta")
+    table.add_column("ID", style="bold")
+    table.add_column("Name", style="cyan")
+    table.add_column("GivenName", style="magenta")
     table.add_column("IPv4", style="green")
-    table.add_column("RX Bytes", style="blue")
-    table.add_column("TX Bytes", style="yellow")
-    table.add_column("Remote IP", style="red")
+    table.add_column("Created At", style="blue")
+    table.add_column("Expires At", style="red")
+    table.add_column("Last Seen", style="yellow")
+    table.add_column("Online", style="green")
 
     for device in devices:
         table.add_row(
             device["id"],
             device["name"],
-            device["ipv4"],
-            device["rx_bytes"],
-            device["tx_bytes"],
-            device["remote_ip"],
+            device["givenName"],
+            ", ".join(device["ipAddresses"]),
+            device["createdAt"],
+            device["expiry"],
+            device["lastSeen"],
+            "Yes" if device["online"] else "No",
         )
     console.print(table)
 
 @app.command(name="create")
 @cli_ready
-def create_device(name: str = typer.Argument(..., help="The device name")):
+def enroll(name: str = typer.Argument(..., help="The device name")):
     """
-    Create a device
+    Self enroll device to vpn
     """
-    rsp = APIDriver().post(
-        f"/devices/{Config().username}",
-        json={"name": name},
-        additional_headers={"Content-Type": "application/json"}
-    )
-    if rsp.status_code >= 200 < 300:
-        console.print(f"Device {name} created :tada:")
-        data = rsp.json()
-        config_path = f"/{getcwd()}/{name}.conf"
-        wireguard.generate_config(data["device"], data["private_key"], config_path)
-        console.print(f"Configuration file saved to {config_path}")
-        return
-    console.print(f"Error creating device {name} ({rsp.status_code})")
+    # Todo: Check if tailscale cli is installed and Create preauth key with api and call tailscale cli to enroll device
+    ...
 
 @app.command(name="delete")
 @cli_ready
-def delete_device(
-    device_id: str = typer.Argument(..., help="The device ID")
-):
+def quit():
     """
-    Delete a device
+    Self logout or logout specified device
     """
-    rsp = APIDriver().delete(f"/devices/{Config().username}/{device_id}")
-    if rsp.status_code == 200:
-        console.print(f"Device {device_id} deleted :fire:")
-        return
-    console.print(f"Error deleting device {device_id} ({rsp.status_code})")
+    # Todo : Check if tailscale cli is installed logout user shutdown tailscale and call api to delete device if asked
+    ...
