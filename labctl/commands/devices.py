@@ -44,14 +44,25 @@ def list_devices():
         )
     console.print(table)
 
-@app.command(name="create")
+@app.command(name="enroll")
 @cli_ready
 def enroll(name: str = typer.Argument(..., help="The device name")):
     """
     Self enroll device to vpn
     """
     # Todo: Check if tailscale cli is installed and Create preauth key with api and call tailscale cli to enroll device
-    ...
+    bin = which("tailscale")
+    if not bin:
+        console.print("[red]TailScale cli not found in path please install it[/red]")
+        return
+    config = Config()
+    api_driver = APIDriver()
+    key_rsp = api_driver.get(f"/devices/{config.username}/preauthkey")
+    key = key_rsp.json().get("key")
+    print("Running tailscale login...")
+    cmd = [bin, "login", "--login-server", "https://gw.laboinfra.net", "--auth-key", key, "--accept-routes", "true", "--hostname", name]
+    print("Execeuting: " + " ".join(cmd))
+    print("Output: " + run(cmd, stdout=PIPE).stdout.decode())
 
 @app.command(name="logout")
 def logout():
