@@ -56,4 +56,4 @@ def quit():
     Self logout or logout specified device
     """
     # Todo : Check if tailscale cli is installed logout user shutdown tailscale and call api to delete device if asked
-    ...
+    config = Config()
