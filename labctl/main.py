@@ -13,6 +13,9 @@ app = typer.Typer()
 app.add_typer(commands.config_app, name="config", help="Manage the configuration")
 app.add_typer(commands.devices_app, name="devices", help="Manage vpn devices")
 
+if Config().admin_cli:
+    app.add_typer(commands.admin_app, name="admin", help="Admin commands")
+
 @app.callback()
 def callback():
     """
@@ -46,6 +49,7 @@ def me(
     tree.add("[bold]Username:[/bold] " + data.get("username"))
     tree.add("[bold]Email:[/bold] " + data.get("email"))
 
+    # Todo rework this deprecated code
     devices_tree = tree.add(":open_file_folder: Devices")
     for device in data.get('devices_access', []):
         device_tree = devices_tree.add(":computer: " + device.get('name', ':question: Unnamed Device'))

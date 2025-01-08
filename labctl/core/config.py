@@ -11,6 +11,7 @@ class Config:
     username: str
     api_token: str
     token_type: str
+    admin_cli: bool = False
 
     def __init__(self, **kwargs):
         """
