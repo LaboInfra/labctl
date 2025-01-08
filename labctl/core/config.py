@@ -1,9 +1,10 @@
 from pathlib import Path
+from os import environ
 
 import yaml
 
 CONFIG_LOCATION_DIR = f"{Path.home()}/"
-CONIIG_FILE = ".labctl_config.yaml"
+CONFIG_FILE = environ.get("LABCTL_CONFIG_FILE", ".labctl.yaml")
 
 class Config:
 
@@ -11,6 +12,7 @@ class Config:
     username: str
     api_token: str
     token_type: str
+    admin_cli: bool = False
 
     def __init__(self, **kwargs):
         """
@@ -22,7 +24,7 @@ class Config:
             Path(CONFIG_LOCATION_DIR).mkdir(parents=True)
 
         # If the config file does not exist, create a new one else load the existing one
-        if not Path(CONFIG_LOCATION_DIR + CONIIG_FILE).exists():
+        if not Path(CONFIG_LOCATION_DIR + CONFIG_FILE).exists():
             self.save()
         else:
             self.load()
@@ -38,7 +40,7 @@ class Config:
         """
         Save the current configuration to the configuration file
         """
-        with open(CONFIG_LOCATION_DIR + CONIIG_FILE, "w") as stream:
+        with open(CONFIG_LOCATION_DIR + CONFIG_FILE, "w") as stream:
             yaml.dump(self.__dict__, stream)
         return self
 
@@ -46,7 +48,7 @@ class Config:
         """
         Load the configuration from the configuration file
         """
-        with open(CONFIG_LOCATION_DIR + CONIIG_FILE, "r") as stream:
+        with open(CONFIG_LOCATION_DIR + CONFIG_FILE, "r") as stream:
             self.__dict__.update(yaml.load(stream, Loader=yaml.FullLoader))
         return self
 

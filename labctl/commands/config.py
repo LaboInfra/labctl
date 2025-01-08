@@ -29,6 +29,8 @@ def show():
     table.add_row("API URL", config.api_endpoint)
     table.add_row("API User", config.username)
     table.add_row("API Token", api_token)
+    if config.admin_cli:
+        table.add_row("Admin CLI Mode", "Enabled")
     console.print(table)
 
     if not config.api_endpoint:
