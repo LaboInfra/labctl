@@ -1,9 +1,7 @@
-from typing import Annotated
 from time import sleep
 from os import environ
 from json import dumps
 
-import requests
 import typer
 from rich.tree import Tree
 
