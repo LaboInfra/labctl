@@ -46,7 +46,7 @@ def list_devices():
 
 @app.command(name="enroll")
 @cli_ready
-def enroll(name: str = typer.Argument(..., help="The device name")):
+def enroll():
     """
     Self enroll device to vpn
     """
@@ -60,7 +60,7 @@ def enroll(name: str = typer.Argument(..., help="The device name")):
     key_rsp = api_driver.get(f"/devices/{config.username}/preauthkey")
     key = key_rsp.json().get("key")
     print("Running tailscale login...")
-    cmd = [bin, "login", "--login-server", "https://gw.laboinfra.net", "--auth-key", key, "--accept-routes", "true", "--hostname", name]
+    cmd = [bin, "login", "--login-server", "https://gw.laboinfra.net", "--auth-key", key, "--accept-routes", "true"]
     print("Execeuting: " + " ".join(cmd))
     print("Output: " + run(cmd, stdout=PIPE).stdout.decode())
 
