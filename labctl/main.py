@@ -145,7 +145,7 @@ def reset_password(
     if not config.api_endpoint:
         console.print("[red]Error: Config not ready use `labctl config set --api-endpoint=<server>`[/red]")
         return
-    username = Config().username or username or environ.get("LABCTL_API_ENDPOINT_USERNAME")
+    username = username or Config().username or environ.get("LABCTL_API_ENDPOINT_USERNAME")
     if not username:
         username = typer.prompt("Enter your username")
 
