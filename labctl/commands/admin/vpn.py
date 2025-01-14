@@ -8,9 +8,11 @@ app = typer.Typer()
 
 app_group = typer.Typer()
 app_acl = typer.Typer()
+app_host = typer.Typer()
 
 app.add_typer(app_group, name="group")
 app.add_typer(app_acl, name="acl")
+app.add_typer(app_host, name="host")
 
 @app_group.command(name="add-user")
 def add_user(username: str, group: str):
@@ -93,3 +95,55 @@ def del_acl(acl_id: int):
         console.print(f"[red]Error: {rsp.text}[/red]")
         return
     console.print("ACL deleted")
+
+@app_host.command(name="list")
+def list_hosts():
+    """
+    List VPN hosts
+    """
+    api_driver = APIDriver()
+    rsp = api_driver.get("/headscale/host/")
+    if rsp.status_code >= 400:
+        console.print(f"[red]Error: {rsp.text}[/red]")
+        return
+    hosts = rsp.json()
+    table = Table(title="VPN Hosts IP -> Host binding")
+    table.add_column("ID", style="cyan bold")
+    table.add_column("Host", style="green")
+    table.add_column("IP", style="magenta")
+
+    for host in hosts:
+        table.add_row(
+            str(host.get("id")),
+            host.get("name"),
+            host.get("ip")
+        )
+    console.print(table)
+
+@app_host.command(name="add")
+def add_host(name: str, ip: str):
+    """
+    Add VPN host
+    """
+    api_driver = APIDriver()
+    data = {
+        "name": name,
+        "ip": ip
+    }
+    rsp = api_driver.post("/headscale/host/", json=data)
+    if rsp.status_code >= 400:
+        console.print(f"[red]Error: {rsp.text}[/red]")
+        return
+    console.print("Host added")
+
+@app_host.command(name="del")
+def del_host(host_id: int):
+    """
+    Delete VPN host
+    """
+    api_driver = APIDriver()
+    rsp = api_driver.delete(f"/headscale/host/{host_id}")
+    if rsp.status_code >= 400:
+        console.print(f"[red]Error: {rsp.text}[/red]")
+        return
+    console.print("Host deleted")
