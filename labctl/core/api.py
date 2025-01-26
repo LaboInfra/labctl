@@ -38,3 +38,12 @@ class APIDriver:
 
     def delete(self, path: str) -> requests.Response:
         return requests.delete(self.api_url + path, headers=self.headers)
+
+    def put(self, path: str, data: dict = {}, json: dict = {}, additional_headers: dict = {}) -> requests.Response:
+        headers = self.headers
+        headers.update(additional_headers)
+        if data:
+            return requests.put(self.api_url + path, headers=headers, data=data)
+        if json:
+            return requests.put(self.api_url + path, headers=headers, json=json)
+        return requests.put(self.api_url + path, headers=headers)
