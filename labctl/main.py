@@ -12,6 +12,7 @@ app = typer.Typer()
 
 app.add_typer(commands.config_app, name="config", help="Manage the configuration")
 app.add_typer(commands.devices_app, name="devices", help="Manage vpn devices")
+app.add_typer(commands.openstack_app, name="openstack", help="Manage openstack projects")
 
 if Config().admin_cli:
     app.add_typer(commands.admin_app, name="admin", help="Admin commands")

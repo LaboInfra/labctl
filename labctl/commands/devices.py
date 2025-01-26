@@ -60,7 +60,7 @@ def enroll():
     key_rsp = api_driver.get(f"/devices/{config.username}/preauthkey")
     key = key_rsp.json().get("key")
     print("Running tailscale login...")
-    cmd = [bin, "login", "--login-server", "https://gw.laboinfra.net", "--auth-key", key, "--accept-routes", "true"]
+    cmd = [bin, "login", "--login-server", "https://gw.laboinfra.net", "--auth-key", key, "--accept-routes"]
     print("Execeuting: " + " ".join(cmd))
     print("Output: " + run(cmd, stdout=PIPE).stdout.decode())
 
