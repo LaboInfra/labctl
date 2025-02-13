@@ -12,7 +12,8 @@ app = typer.Typer()
 
 app.add_typer(commands.config_app, name="config", help="Manage the configuration")
 app.add_typer(commands.devices_app, name="devices", help="Manage vpn devices")
-app.add_typer(commands.openstack_app, name="openstack", help="Manage openstack projects")
+app.add_typer(commands.project_app, name="project", help="Manage OpenStack projects")
+app.add_typer(commands.quota_app, name="quota", help="Manage OpenStack quotas")
 
 if Config().admin_cli:
     app.add_typer(commands.admin_app, name="admin", help="Admin commands")
@@ -22,6 +23,7 @@ def callback():
     """
     labctl
     """
+    pass
 
 @app.command()
 def version():
@@ -43,6 +45,7 @@ def me(
     """
     api_driver = APIDriver()
     data = api_driver.get("/me").json()
+    config = Config()
     if json:
         print(dumps(data))
         return
@@ -50,16 +53,20 @@ def me(
     tree.add("[bold]Username:[/bold] " + data.get("username"))
     tree.add("[bold]Email:[/bold] " + data.get("email"))
 
-    # Todo rework this deprecated code
-    devices_tree = tree.add(":open_file_folder: Devices")
-    for device in data.get('devices_access', []):
-        device_tree = devices_tree.add(":computer: " + device.get('name', ':question: Unnamed Device'))
-        device_tree.add("[bold]ID:[/bold] " + device.get('id', ''))
-        device_tree.add("[bold]IPv4:[/bold] " + device.get('ipv4', ''))
-        device_tree.add("[bold]Latest Handshake:[/bold] " + str(device.get('latest_handshake', '')))
-        device_tree.add("[bold]RX Bytes:[/bold] " + str(device.get('rx_bytes', 0)))
-        device_tree.add("[bold]TX Bytes:[/bold] " + str(device.get('tx_bytes', 0)))
-        device_tree.add("[bold]Remote IP:[/bold] " + str(device.get('remote_ip', '')))
+    project_list = api_driver.get("/openstack/projects/" + config.username).json()
+    project_tree = tree.add(":open_file_folder: Projects")
+    for project in project_list:
+        project_tree = project_tree.add(":computer: " + project.get('name'))
+        project_tree.add("[bold]Role:[/bold] " + project.get('type', ''))
+        project_tree.add("Members: (WIP)")
+    if not project_list:
+        project_tree.add(":warning: No projects found")
+
+    quota_tree = tree.add(":open_file_folder: Quotas")
+    quota_list = api_driver.get(f"/quota/user/{config.username}/total").json()
+    for quota in quota_list:
+        quota_tree.add(f"Type: {quota.get('type')} / {quota.get('quantity')}")
+
     console.print(tree)
 
 @app.command()
@@ -132,6 +139,21 @@ def login(username: str = typer.Option(None, help="The username to login with"))
         return
     console.print("[red]Authentication failed with unknown error[/red]")
     console.print_json(data)
+
+@cli_ready
+@app.command(name="reset-openstack-password")
+def reset_password():
+    """
+    Reset OpenStack password
+    """
+    console.print("[cyan]Resetting your OpenStack user password[/cyan]")
+    config = Config()
+    call = APIDriver().put(f"/openstack/users/{config.username}/reset-password")
+    if call.status_code >= 400:
+        console.print(f"[red]Error: {call.text}[/red]")
+        return
+    console.print(f"[green]New password for {config.username} is [/green][bright_yellow]{call.json()['password']}[/bright_yellow]")
+    console.print("[yellow]Please change it after login on console[/yellow]")
 
 @app.command()
 def reset_password(
