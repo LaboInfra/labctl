@@ -30,10 +30,26 @@ def version():
     """
     Print the version
     """
+    latest_version = APIDriver.get_latest_version()
     version = __version__
+    dev_version = False
     if version == "0.0.0":
         version = "dev or installed from source"
+        dev_version = True
     console.print(f"labctl version: {version} :rocket:")
+    if not latest_version:
+        latest_version = "Could not fetch latest version"
+        console.print(f"Latest version: {latest_version}")
+        return
+    # remove v prefix
+    if version != latest_version.replace("v", "") and not dev_version:
+        console.print(f"[red]:warning: Your version is outdated :warning:[/red]")
+        console.print(f"Latest version: [green]{latest_version.replace('v', '')}[/green]")
+        console.print(f"Your version: [red]{version}[/red]")
+        console.print(f"Please update your client to avoid issues")
+    if dev_version:
+        console.print(f"Dev version has no check intgration for updates please check manually")
+        console.print(f"https://github.com/laboinfra/labctl/releases")
 
 @app.command()
 @cli_ready

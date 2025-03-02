@@ -47,3 +47,27 @@ class APIDriver:
         if json:
             return requests.put(self.api_url + path, headers=headers, json=json)
         return requests.put(self.api_url + path, headers=headers)
+
+    @staticmethod
+    def get_latest_version() -> str | None:
+        """
+        Get the latest version of labctl from pypi or github
+        Returns None if both github and pypi requests fail
+        """
+        print("Checking for updates")
+        try:
+            return get_latest_version_from_github()
+        except Exception:
+            print("Failed to get version from github")
+            pass
+        try:
+            return get_latest_version_from_pypi()
+        except Exception:
+            print("Failed to get version from pypi")
+            return None
+
+def get_latest_version_from_pypi() -> str:
+    return requests.get("https://pypi.org/pypi/labctl/json", timeout=5).json()["info"]["version"]
+
+def get_latest_version_from_github() -> str:
+    return requests.get("https://api.github.com/repos/laboinfra/labctl/releases/latest", timeout=5).json()["tag_name"]
