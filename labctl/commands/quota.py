@@ -28,15 +28,14 @@ def show_project_quota(project: str):
 
     console.print(table)
 
-# labctl openstack quota add PROJECT_NAME QUOTATYPE VALUE
 @cli_ready
-@app.command(name="add")
+@app.command(name="set")
 def add_quota(project: str, quota_type: str, quantity: int, comment: Optional[str] = None):
     """
     Add quota to OpenStack project
     """
     config = Config()
-    console.print(f"[cyan]Adding {quota_type}={quantity} to OpenStack project {project}[/cyan]")
+    console.print(f"[cyan]Setting {quota_type}={quantity} to OpenStack project {project}[/cyan]")
     payload = {
         "username": config.username,
         "project_name": project,
@@ -44,21 +43,8 @@ def add_quota(project: str, quota_type: str, quantity: int, comment: Optional[st
         "quantity": quantity,
         "comment": comment
     }
-    call = APIDriver().post(f"/quota/adjust-project", json=payload)
+    call = APIDriver().put(f"/quota/adjust-project", json=payload)
     if call.status_code >= 400:
         console.print(f"[red]Error: {call.text}[/red]")
         return
-    console.print(f"[green]Quota {quota_type}={quantity} added to project {project}[/green]")
-
-@cli_ready
-@app.command(name="del")
-def del_quota(id: int):
-    """
-    Delete quota from OpenStack project
-    """
-    console.print(f"[cyan]Deleting quota {id} from OpenStack project[/cyan]")
-    call = APIDriver().delete(f"/quota/adjust-project/{id}/{Config().username}")
-    if call.status_code >= 400:
-        console.print(f"[red]Error: {call.text}[/red]")
-        return
-    console.print(f"[green]Quota {id} deleted from project[/green]")
+    console.print(f"[green]Quota {quota_type}={quantity} set to project {project}[/green]")
