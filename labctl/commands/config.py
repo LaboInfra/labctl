@@ -40,7 +40,8 @@ def show():
 
 @app.command(name="set")
 def set_config(
-    api_endpoint: str = typer.Option(None, help="Set the API endpoint")
+    api_endpoint: str = typer.Option(None, help="Set the API endpoint"),
+    username: str = typer.Option(None, help="Set the username"),
 ):
     """
     Set the configuration
@@ -48,6 +49,8 @@ def set_config(
     new_config = {}
     if api_endpoint:
         new_config["api_endpoint"] = api_endpoint
+    if username:
+        new_config["username"] = username
     if not new_config:
         console.print("[red]No settings provided[/red]")
         raise typer.Abort()
