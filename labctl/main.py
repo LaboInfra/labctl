@@ -72,9 +72,9 @@ def me(
     project_list = api_driver.get("/openstack/projects/" + config.username).json()
     project_tree = tree.add(":open_file_folder: Projects")
     for project in project_list:
-        project_tree = project_tree.add(":computer: " + project.get('name'))
-        project_tree.add("[bold]Owner:[/bold] " + project.get('owner', ''))
-        project_tree.add("Members: " + " ".join(project.get('members', [])))
+        project_tree_item = project_tree.add(":computer: " + project.get('name'))
+        project_tree_item.add("[bold]Owner:[/bold] " + project.get('owner', ''))
+        project_tree_item.add("Members: " + " ".join(project.get('members', [])))
     if not project_list:
         project_tree.add(":warning: No projects found")
 
