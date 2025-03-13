@@ -69,16 +69,39 @@ def me(
     tree.add("[bold]Username:[/bold] " + data.get("username"))
     tree.add("[bold]Email:[/bold] " + data.get("email"))
 
+    # show projects info
     project_list = api_driver.get("/openstack/projects/" + config.username).json()
     project_tree = tree.add(":open_file_folder: Projects")
     for project in project_list:
         project_tree_item = project_tree.add(":computer: " + project.get('name'))
         project_tree_item.add("[bold]Owner:[/bold] " + project.get('owner', ''))
         project_tree_item.add("Members: " + " ".join(project.get('members', [])))
+
+        # show quotas for project
+        project_quota_list = api_driver.get(f"/quota/project/{project.get('name')}/adjustements")
+        if project_quota_list.status_code >= 400:
+            project_tree_item.add(f":warning: Error fetching quotas for project {project.get('name')}")
+            continue
+
+        project_quota_tree = project_tree_item.add(":open_file_folder: Quotas for project")
+        quota_types = set([quota.get('type') for quota in project_quota_list.json()])
+        total_quotas = {quota_type: 0 for quota_type in quota_types}
+        self_quotas = {quota_type: 0 for quota_type in quota_types}
+        for quota in project_quota_list.json():
+            total_quotas[quota.get('type')] += quota.get('quantity')
+            if quota.get('username') == config.username:
+                self_quotas[quota.get('type')] += quota.get('quantity')
+
+        for quota_type, quantity in total_quotas.items():
+            if quantity == 0:
+                continue
+            project_quota_tree.add(f"{quota_type} Total: {quantity}")
+            project_quota_tree.add(f"{quota_type} You give: {self_quotas[quota_type]}")
+
     if not project_list:
         project_tree.add(":warning: No projects found")
 
-    quota_tree = tree.add(":open_file_folder: Quotas")
+    quota_tree = tree.add(":open_file_folder: Quotas owned")
     quota_list = api_driver.get(f"/quota/user/{config.username}/total").json()
     for quota in quota_list:
         quota_tree.add(f"Type: {quota.get('type')} / {quota.get('quantity')}")
