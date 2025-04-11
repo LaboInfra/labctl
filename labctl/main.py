@@ -257,3 +257,15 @@ def change_password():
         console.print(f"[red]Error: {data['detail']}[/red]")
         return
     console.print(f"[green]{data.get("message")} for {config.username}[/green]")
+
+@app.command()
+def forgot_password(email: str):
+    """
+    Request a password reset for the FastOnBoard-API server
+    """
+    config = Config()
+    if not config.api_endpoint:
+        console.print("[red]Error: Config not ready use `labctl config set --api-endpoint=<server>`[/red]")
+        return
+    APIDriver().post(f"/users/forgot-password?email={email}").json()
+    console.print(f"[green]If the email is registered you will receive a password reset link[/green]")
